@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 40" fill="none">
+  <text x="4" y="30" font-family="'JetBrains Mono', 'Courier New', monospace" font-size="22" font-weight="700">
+    <tspan fill="#00ff00">&lt;</tspan>
+    <tspan fill="#ffffff">Publicae</tspan>
+    <tspan fill="#00ff00">./&gt;</tspan>
+  </text>
+</svg>

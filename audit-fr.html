@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rapport d'Audit UI/UX — Plateforme Publicae</title>
+  <style>
+    /* ============================
+       RESET & BASE
+    ============================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #000000;
+      --dark: #0a0a0a;
+      --card: #111111;
+      --card-alt: #1a1a1a;
+      --green: #00ff00;
+      --green-dim: rgba(0,255,0,.15);
+      --green-glow: rgba(0,255,0,.35);
+      --white: #ffffff;
+      --gray: #888888;
+      --gray-light: #aaaaaa;
+      --gray-dark: #333333;
+      --red: #ff4444;
+      --orange: #ff8800;
+      --yellow: #ffcc00;
+      --font-mono: 'Courier New', 'Fira Code', monospace;
+      --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ============================
+       MATRIX RAIN BACKGROUND
+    ============================ */
+    #matrix-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      opacity: .07;
+      pointer-events: none;
+    }
+
+    /* ============================
+       LAYOUT
+    ============================ */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section {
+      padding: 80px 0;
+      border-bottom: 1px solid var(--card-alt);
+    }
+
+    /* ============================
+       HERO
+    ============================ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      padding: 40px 24px;
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border: 1px solid var(--green);
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 32px;
+      animation: pulse-border 2s ease-in-out infinite;
+    }
+
+    .hero__badge::before {
+      content: '';
+      width: 8px; height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 0 0 var(--green-glow); }
+      50% { box-shadow: 0 0 20px 4px var(--green-glow); }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+
+    .hero__title {
+      font-family: var(--font-mono);
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .hero__title span {
+      color: var(--green);
+      text-shadow: 0 0 30px var(--green-glow);
+    }
+
+    .hero__subtitle {
+      font-size: clamp(1rem, 2vw, 1.35rem);
+      color: var(--gray-light);
+      max-width: 700px;
+      margin-bottom: 48px;
+    }
+
+    .hero__meta {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hero__meta-item {
+      text-align: center;
+    }
+
+    .hero__meta-value {
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green);
+      text-shadow: 0 0 15px var(--green-glow);
+    }
+
+    .hero__meta-label {
+      font-size: .85rem;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hero__scroll {
+      position: absolute;
+      bottom: 40px;
+      color: var(--gray);
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    .hero__scroll::after {
+      content: '';
+      display: block;
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, var(--green), transparent);
+      margin: 8px auto 0;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+
+    /* ============================
+       SECTION HEADERS
+    ============================ */
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: .8rem;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-family: var(--font-mono);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .section-desc {
+      color: var(--gray-light);
+      max-width: 600px;
+      margin-bottom: 48px;
+    }
+
+    /* ============================
+       NAV FLOATING
+    ============================ */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-alt);
+      transform: translateY(-100%);
+      transition: transform .3s ease;
+    }
+
+    .nav.visible { transform: translateY(0); }
+
+    .nav__logo {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .nav__links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav__links a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: .85rem;
+      transition: color .2s;
+    }
+
+    .nav__links a:hover { color: var(--green); }
+
+    .nav__lang {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav__lang a {
+      color: var(--gray);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: .8rem;
+      padding: 4px 10px;
+      border: 1px solid var(--gray-dark);
+      border-radius: 4px;
+      transition: all .2s;
+    }
+
+    .nav__lang a:hover,
+    .nav__lang a.active {
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    /* ============================
+       CARDS
+    ============================ */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-alt);
+      border-radius: 12px;
+      padding: 32px;
+      transition: all .3s ease;
+    }
+
+    .card:hover {
+      border-color: var(--green);
+      box-shadow: 0 0 30px rgba(0,255,0,.08);
+      transform: translateY(-2px);
+    }
+
+    /* ============================
+       PRIORITY BADGES
+    ============================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .badge--p0 { background: rgba(255,68,68,.15); color: var(--red); border: 1px solid rgba(255,68,68,.3); }
+    .badge--p1 { background: rgba(255,136,0,.15); color: var(--orange); border: 1px solid rgba(255,136,0,.3); }
+    .badge--p2 { background: rgba(255,204,0,.15); color: var(--yellow); border: 1px solid rgba(255,204,0,.3); }
+
+    /* ============================
+       PAGES TABLE
+    ============================ */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--card-alt);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+
+    thead {
+      background: var(--card);
+    }
+
+    th {
+      padding: 14px 20px;
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 1px solid var(--card-alt);
+    }
+
+    td {
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      color: var(--gray-light);
+    }
+
+    tr:hover td {
+      background: rgba(0,255,0,.03);
+    }
+
+    td:first-child {
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-dot--ok { background: var(--green); }
+    .status-dot--warn { background: var(--orange); }
+    .status-dot--error { background: var(--red); }
+
+    /* ============================
+       FINDINGS GRID
+    ============================ */
+    .findings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+    }
+
+    .finding {
+      background: var(--card);
+      border: 1px solid var(--card-alt);
+      border-radius: 12px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: all .3s ease;
+    }
+
+    .finding:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    }
+
+    .finding::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .finding--p0::before { background: var(--red); }
+    .finding--p1::before { background: var(--orange); }
+    .finding--p2::before { background: var(--yellow); }
+
+    .finding__number {
+      font-family: var(--font-mono);
+      font-size: 3rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.06);
+      position: absolute;
+      top: 12px; right: 20px;
+    }
+
+    .finding__title {
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 12px 0 10px;
+      color: var(--white);
+    }
+
+    .finding__desc {
+      font-size: .9rem;
+      color: var(--gray-light);
+      line-height: 1.7;
+    }
+
+    .finding__evidence {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(0,0,0,.4);
+      border-radius: 8px;
+      border-left: 3px solid var(--green);
+      font-family: var(--font-mono);
+      font-size: .8rem;
+      color: var(--green);
+      line-height: 1.8;
+    }
+
+    /* ============================
+       COLOR PALETTE
+    ============================ */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .color-swatch {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--card-alt);
+      transition: transform .2s;
+    }
+
+    .color-swatch:hover { transform: scale(1.03); }
+
+    .color-swatch__preview {
+      height: 80px;
+      position: relative;
+    }
+
+    .color-swatch__info {
+      padding: 12px 16px;
+      background: var(--card);
+    }
+
+    .color-swatch__name {
+      font-size: .85rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .color-swatch__hex {
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      color: var(--gray);
+    }
+
+    /* ============================
+       SCORE METERS
+    ============================ */
+    .scores {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+    }
+
+    .score-card {
+      background: var(--card);
+      border: 1px solid var(--card-alt);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .score-ring {
+      width: 120px; height: 120px;
+      margin: 0 auto 16px;
+      position: relative;
+    }
+
+    .score-ring svg {
+      width: 100%; height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .score-ring__bg {
+      fill: none;
+      stroke: var(--card-alt);
+      stroke-width: 8;
+    }
+
+    .score-ring__fill {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 314;
+      transition: stroke-dashoffset 1.5s ease;
+    }
+
+    .score-ring__value {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .score-card__label {
+      font-size: .85rem;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ============================
+       LAYOUT COMPARISON
+    ============================ */
+    .layouts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .layout-card {
+      background: var(--card);
+      border: 1px solid var(--card-alt);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .layout-card__icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .layout-card__name {
+      font-family: var(--font-mono);
+      font-size: .9rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--green);
+    }
+
+    .layout-card__pages {
+      font-size: .8rem;
+      color: var(--gray);
+      line-height: 1.8;
+    }
+
+    /* ============================
+       TERMINAL BLOCK
+    ============================ */
+    .terminal {
+      background: var(--dark);
+      border: 1px solid var(--card-alt);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 32px;
+    }
+
+    .terminal__bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--card-alt);
+    }
+
+    .terminal__dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+
+    .terminal__dot--red { background: #ff5f57; }
+    .terminal__dot--yellow { background: #ffbd2e; }
+    .terminal__dot--green { background: #28c840; }
+
+    .terminal__title {
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      color: var(--gray);
+      margin-left: 8px;
+    }
+
+    .terminal__body {
+      padding: 20px 24px;
+      font-family: var(--font-mono);
+      font-size: .85rem;
+      line-height: 2;
+      color: var(--green);
+      overflow-x: auto;
+    }
+
+    .terminal__body .comment { color: var(--gray); }
+    .terminal__body .value { color: var(--white); }
+    .terminal__body .error { color: var(--red); }
+    .terminal__body .warn { color: var(--orange); }
+
+    /* ============================
+       FOOTER
+    ============================ */
+    .footer {
+      padding: 48px 0;
+      text-align: center;
+      color: var(--gray);
+      font-size: .85rem;
+    }
+
+    .footer__logo {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    /* ============================
+       ANIMATIONS
+    ============================ */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ============================
+       RESPONSIVE
+    ============================ */
+    @media (max-width: 768px) {
+      .nav__links { display: none; }
+      .findings-grid { grid-template-columns: 1fr; }
+      .hero__meta { gap: 24px; }
+      section { padding: 48px 0; }
+      .card { padding: 20px; }
+      .finding { padding: 20px; }
+    }
+
+    /* ============================
+       SCROLLBAR
+    ============================ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- Matrix Rain Canvas -->
+<canvas id="matrix-canvas"></canvas>
+
+<!-- Navigation -->
+<nav class="nav" id="nav">
+  <div class="nav__logo">&lt;Publicae./&gt; Audit</div>
+  <ul class="nav__links">
+    <li><a href="#overview">Synth&egrave;se</a></li>
+    <li><a href="#pages">Pages</a></li>
+    <li><a href="#findings">Constats</a></li>
+    <li><a href="#palette">Palette</a></li>
+    <li><a href="#scores">Analyse</a></li>
+    <li><a href="#recommendation">Recommandation</a></li>
+  </ul>
+  <div class="nav__lang">
+    <a href="audit-en.html">EN</a>
+    <a href="audit-fr.html" class="active">FR</a>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <div class="hero__badge">Rapport d'Audit en Direct</div>
+  <h1 class="hero__title">
+    <span>&lt;</span>Publicae<span>./&gt;</span><br>
+    Audit UI/UX
+  </h1>
+  <p class="hero__subtitle">
+    Audit front-end complet de la plateforme sociale NWO Capital.<br>
+    19 pages analys&eacute;es &middot; 16 probl&egrave;mes identifi&eacute;s &middot; 3 niveaux de priorit&eacute;.
+  </p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <div class="hero__meta-value">19</div>
+      <div class="hero__meta-label">Pages trouv&eacute;es</div>
+    </div>
+    <div class="hero__meta-item">
+      <div class="hero__meta-value">4</div>
+      <div class="hero__meta-label">P0 Critiques</div>
+    </div>
+    <div class="hero__meta-item">
+      <div class="hero__meta-value">6</div>
+      <div class="hero__meta-label">P1 Importants</div>
+    </div>
+    <div class="hero__meta-item">
+      <div class="hero__meta-value">6</div>
+      <div class="hero__meta-label">P2 Am&eacute;liorations</div>
+    </div>
+  </div>
+  <div class="hero__scroll">D&eacute;filer pour explorer</div>
+</section>
+
+<!-- ========== OVERVIEW ========== -->
+<section id="overview">
+  <div class="container">
+    <div class="section-tag">// 01 &mdash; Synth&egrave;se</div>
+    <h2 class="section-title">R&eacute;sum&eacute; Ex&eacute;cutif</h2>
+    <p class="section-desc">
+      La plateforme Publicae pr&eacute;sente une identit&eacute; visuelle forte avec son esth&eacute;tique cyberpunk inspir&eacute;e de Matrix. Cependant, l'audit r&eacute;v&egrave;le des incoh&eacute;rences critiques qui &eacute;rodent la confiance utilisateur, une navigation fragment&eacute;e sur 4+ syst&egrave;mes de layout diff&eacute;rents, et des probl&egrave;mes responsive significatifs sur mobile.
+    </p>
+
+    <div class="scores fade-in">
+      <div class="score-card">
+        <div class="score-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-ring__bg" cx="50" cy="50" r="45"/>
+            <circle class="score-ring__fill" cx="50" cy="50" r="45" style="stroke: var(--red); stroke-dashoffset: 236;" />
+          </svg>
+          <div class="score-ring__value" style="color: var(--red);">25</div>
+        </div>
+        <div class="score-card__label">Coh&eacute;rence</div>
+      </div>
+      <div class="score-card">
+        <div class="score-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-ring__bg" cx="50" cy="50" r="45"/>
+            <circle class="score-ring__fill" cx="50" cy="50" r="45" style="stroke: var(--orange); stroke-dashoffset: 188;" />
+          </svg>
+          <div class="score-ring__value" style="color: var(--orange);">40</div>
+        </div>
+        <div class="score-card__label">Navigation</div>
+      </div>
+      <div class="score-card">
+        <div class="score-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-ring__bg" cx="50" cy="50" r="45"/>
+            <circle class="score-ring__fill" cx="50" cy="50" r="45" style="stroke: var(--orange); stroke-dashoffset: 172;" />
+          </svg>
+          <div class="score-ring__value" style="color: var(--orange);">45</div>
+        </div>
+        <div class="score-card__label">Responsive</div>
+      </div>
+      <div class="score-card">
+        <div class="score-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-ring__bg" cx="50" cy="50" r="45"/>
+            <circle class="score-ring__fill" cx="50" cy="50" r="45" style="stroke: var(--red); stroke-dashoffset: 220;" />
+          </svg>
+          <div class="score-ring__value" style="color: var(--red);">30</div>
+        </div>
+        <div class="score-card__label">Accessibilit&eacute;</div>
+      </div>
+      <div class="score-card">
+        <div class="score-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-ring__bg" cx="50" cy="50" r="45"/>
+            <circle class="score-ring__fill" cx="50" cy="50" r="45" style="stroke: var(--green); stroke-dashoffset: 94;" />
+          </svg>
+          <div class="score-ring__value" style="color: var(--green);">70</div>
+        </div>
+        <div class="score-card__label">Identit&eacute; Visuelle</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAGES INVENTORY ========== -->
+<section id="pages">
+  <div class="container">
+    <div class="section-tag">// 02 &mdash; Inventaire</div>
+    <h2 class="section-title">Pages D&eacute;couvertes</h2>
+    <p class="section-desc">19 pages uniques identifi&eacute;es dans la webapp et l'AR World Explorer, utilisant 4+ syst&egrave;mes de layout diff&eacute;rents.</p>
+
+    <div class="table-wrap fade-in">
+      <table>
+        <thead>
+          <tr>
+            <th>Page</th>
+            <th>URL</th>
+            <th>Layout</th>
+            <th>Valeur $STATE</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Accueil</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">nwo.capital/</td>
+            <td>Autonome</td>
+            <td>&mdash;</td>
+            <td><span class="status-dot status-dot--ok"></span>OK</td>
+          </tr>
+          <tr>
+            <td>Connexion</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">login.php</td>
+            <td>Autonome</td>
+            <td>&mdash;</td>
+            <td><span class="status-dot status-dot--ok"></span>OK</td>
+          </tr>
+          <tr>
+            <td>Feed (Place Publique)</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">index.php</td>
+            <td>Header + Grille</td>
+            <td style="font-family: var(--font-mono); color: var(--green);">409,707,719,481</td>
+            <td><span class="status-dot status-dot--warn"></span>Probl. responsive</td>
+          </tr>
+          <tr>
+            <td>Tableau de bord</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">dashboard.php</td>
+            <td>Sidebar + Grille</td>
+            <td style="font-family: var(--font-mono); color: var(--green);">409,707,719,481</td>
+            <td><span class="status-dot status-dot--warn"></span>Layout diff&eacute;rent</td>
+          </tr>
+          <tr>
+            <td>Profil</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">profile.php</td>
+            <td>Navbar haut</td>
+            <td style="font-family: var(--font-mono); color: var(--green);">409,707,719,481</td>
+            <td><span class="status-dot status-dot--ok"></span>OK</td>
+          </tr>
+          <tr>
+            <td>Mes Gains</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">earnings.php</td>
+            <td>Navbar haut</td>
+            <td style="font-family: var(--font-mono); color: var(--red);">190,816,106,996</td>
+            <td><span class="status-dot status-dot--error"></span>Incoh&eacute;rence !</td>
+          </tr>
+          <tr>
+            <td>Staking $STATE</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">staking.php</td>
+            <td>Navbar haut</td>
+            <td style="font-family: var(--font-mono); color: var(--green);">409,707,719,481</td>
+            <td><span class="status-dot status-dot--warn"></span>Pas de badge "en ligne"</td>
+          </tr>
+          <tr>
+            <td>Micropr&ecirc;ts</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">microloans.php</td>
+            <td>Navbar haut</td>
+            <td style="font-family: var(--font-mono); color: var(--green);">409,707,719,481</td>
+            <td><span class="status-dot status-dot--ok"></span>OK</td>
+          </tr>
+          <tr>
+            <td>Launchpad</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">launchpad-v3.php</td>
+            <td>Navbar minimal</td>
+            <td style="font-family: var(--font-mono); color: var(--red);">190,816,106,996</td>
+            <td><span class="status-dot status-dot--error"></span>Incoh&eacute;rence !</td>
+          </tr>
+          <tr>
+            <td>Exchange</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">exchange.php</td>
+            <td>Unique</td>
+            <td style="font-family: var(--font-mono); color: var(--orange);">875B (on-chain)</td>
+            <td><span class="status-dot status-dot--warn"></span>Layout unique</td>
+          </tr>
+          <tr>
+            <td>Airdrops</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">airdrops.php</td>
+            <td>Unique</td>
+            <td style="font-family: var(--font-mono); color: var(--red);">Valeurs n&eacute;gatives !</td>
+            <td><span class="status-dot status-dot--error"></span>Bug</td>
+          </tr>
+          <tr>
+            <td>Gamification</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">gamification.php</td>
+            <td>Unique (Arcade)</td>
+            <td style="font-family: var(--font-mono); color: var(--green);">409,707,719,481</td>
+            <td><span class="status-dot status-dot--warn"></span>Layout unique</td>
+          </tr>
+          <tr>
+            <td>Top Cr&eacute;ateurs</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">top-creators.php</td>
+            <td>Unique</td>
+            <td>&mdash;</td>
+            <td><span class="status-dot status-dot--warn"></span>Pas de nav</td>
+          </tr>
+          <tr>
+            <td>Param&egrave;tres</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">settings.php</td>
+            <td>Navbar haut</td>
+            <td style="font-family: var(--font-mono); color: var(--green);">409,707,719,481</td>
+            <td><span class="status-dot status-dot--ok"></span>OK</td>
+          </tr>
+          <tr style="border-top: 2px solid var(--green-dim);">
+            <td colspan="5" style="font-family: var(--font-mono); color: var(--green); font-size: .8rem; padding-top: 16px; letter-spacing: 1px;">// AR WORLD EXPLORER &mdash; pblcnft-claim.onrender.com</td>
+          </tr>
+          <tr>
+            <td>AR World Map</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">arworld.php</td>
+            <td>Unique (Carte)</td>
+            <td>&mdash;</td>
+            <td><span class="status-dot status-dot--warn"></span>Claim fonctionne, 2 bugs P0</td>
+          </tr>
+          <tr>
+            <td>Gameplay</td>
+            <td style="font-family: var(--font-mono); font-size:.8rem;">gameplay.php</td>
+            <td>Unique (Onglets)</td>
+            <td>&mdash;</td>
+            <td><span class="status-dot status-dot--warn"></span>Mobile uniquement</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Layout comparison -->
+    <h3 style="font-family: var(--font-mono); margin: 48px 0 24px; color: var(--green);">// Fragmentation des Layouts</h3>
+    <div class="layouts-grid fade-in">
+      <div class="layout-card">
+        <div class="layout-card__icon">&#9776;</div>
+        <div class="layout-card__name">Layout Sidebar</div>
+        <div class="layout-card__pages">Dashboard uniquement<br>17 liens dans la sidebar</div>
+      </div>
+      <div class="layout-card">
+        <div class="layout-card__icon">&#9866;</div>
+        <div class="layout-card__name">Navbar Haute</div>
+        <div class="layout-card__pages">Profil, Gains, Staking,<br>Micropr&ecirc;ts, Param&egrave;tres</div>
+      </div>
+      <div class="layout-card">
+        <div class="layout-card__icon">&#9881;</div>
+        <div class="layout-card__name">Header Compact</div>
+        <div class="layout-card__pages">Feed (Place Publique)</div>
+      </div>
+      <div class="layout-card">
+        <div class="layout-card__icon">&#10022;</div>
+        <div class="layout-card__name">Unique / Sans Nav</div>
+        <div class="layout-card__pages">Exchange, Airdrops, Gamification,<br>Top Cr&eacute;ateurs, Launchpad</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FINDINGS ========== -->
+<section id="findings">
+  <div class="container">
+    <div class="section-tag">// 03 &mdash; Constats</div>
+    <h2 class="section-title">Probl&egrave;mes Identifi&eacute;s</h2>
+    <p class="section-desc">16 probl&egrave;mes class&eacute;s par criticit&eacute;. P0 = casse la confiance, P1 = d&eacute;grade l'UX, P2 = polish &agrave; faire.</p>
+
+    <!-- P0 Critical -->
+    <h3 style="font-family: var(--font-mono); margin-bottom: 24px;">
+      <span class="badge badge--p0">&#9888; P0 &mdash; Critique</span>
+    </h3>
+    <div class="findings-grid fade-in" style="margin-bottom: 48px;">
+
+      <div class="finding finding--p0">
+        <div class="finding__number">#1</div>
+        <span class="badge badge--p0">P0 Critique</span>
+        <h4 class="finding__title">Solde $STATE incoh&eacute;rent entre les pages</h4>
+        <p class="finding__desc">Le m&ecirc;me utilisateur voit 3 soldes $STATE diff&eacute;rents selon la page visit&eacute;e. Cela d&eacute;truit la confiance et donne l'impression que la plateforme est peu fiable ou exploitable.</p>
+        <div class="finding__evidence">
+          <span class="comment">// Feed / Profil / Dashboard :</span><br>
+          <span class="value">409,707,719,481 $STATE</span><br><br>
+          <span class="comment">// Gains / Launchpad :</span><br>
+          <span class="error">190,816,106,996 $STATE</span><br><br>
+          <span class="comment">// Exchange (on-chain) :</span><br>
+          <span class="warn">875,183,153,310.64 STATE</span>
+        </div>
+      </div>
+
+      <div class="finding finding--p0">
+        <div class="finding__number">#2</div>
+        <span class="badge badge--p0">P0 Critique</span>
+        <h4 class="finding__title">Valeurs n&eacute;gatives sur la page Airdrops</h4>
+        <p class="finding__desc">Plusieurs m&eacute;triques affichent des nombres n&eacute;gatifs &eacute;normes, indiquant soit un bug d'overflow, soit une erreur de logique dans le calcul de distribution des airdrops.</p>
+        <div class="finding__evidence">
+          <span class="comment">// Pool historique :</span><br>
+          <span class="error">-1,506,078,780,288</span><br><br>
+          <span class="comment">// Votre part potentielle :</span><br>
+          <span class="error">-2,258,357,461,832</span><br><br>
+          <span class="comment">// Gains Airdrop :</span><br>
+          <span class="error">-218,891,612,485</span>
+        </div>
+      </div>
+
+      <div class="finding finding--p0">
+        <div class="finding__number">#3</div>
+        <span class="badge badge--p0">P0 Critique</span>
+        <h4 class="finding__title">4+ syst&egrave;mes de layout incompatibles</h4>
+        <p class="finding__desc">Les utilisateurs rencontrent une structure de navigation compl&egrave;tement diff&eacute;rente selon la page visit&eacute;e. Il n'y a pas de &laquo;&nbsp;shell&nbsp;&raquo; ou cadre coh&eacute;rent. La plateforme ressemble &agrave; des micro-sites ind&eacute;pendants assembl&eacute;s.</p>
+        <div class="finding__evidence">
+          <span class="comment">// Sidebar (Dashboard) &ne; Navbar (Profil)</span><br>
+          <span class="comment">// &ne; Header compact (Feed) &ne; Sans nav (Top Cr&eacute;ateurs)</span><br>
+          <span class="warn">R&eacute;sultat : les utilisateurs se perdent</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- P1 Important -->
+    <h3 style="font-family: var(--font-mono); margin-bottom: 24px;">
+      <span class="badge badge--p1">&#9888; P1 &mdash; Important</span>
+    </h3>
+    <div class="findings-grid fade-in" style="margin-bottom: 48px;">
+
+      <div class="finding finding--p1">
+        <div class="finding__number">#4</div>
+        <span class="badge badge--p1">P1 Important</span>
+        <h4 class="finding__title">Responsive mobile cass&eacute; sur le Feed</h4>
+        <p class="finding__desc">Sur iPhone (390px), le header est tronqu&eacute; : montant $STATE coup&eacute;, boutons Connect Wallet et Profil invisibles, bouton &laquo;&nbsp;Post&nbsp;&raquo; masqu&eacute;, onglet &laquo;&nbsp;Monetized&nbsp;&raquo; coup&eacute;.</p>
+      </div>
+
+      <div class="finding finding--p1">
+        <div class="finding__number">#5</div>
+        <span class="badge badge--p1">P1 Important</span>
+        <h4 class="finding__title">Navigation fragment&eacute;e (3 menus diff&eacute;rents)</h4>
+        <p class="finding__desc">Le popup profil montre 7 liens, la navbar haute montre 6 items, la sidebar du dashboard montre 17 items. Aucune coh&eacute;rence &mdash; certaines pages ne sont accessibles que depuis certains menus.</p>
+      </div>
+
+      <div class="finding finding--p1">
+        <div class="finding__number">#6</div>
+        <span class="badge badge--p1">P1 Important</span>
+        <h4 class="finding__title">Indicateur &laquo;&nbsp;En ligne&nbsp;&raquo; intermittent</h4>
+        <p class="finding__desc">Le badge vert &laquo;&nbsp;1 online&nbsp;&raquo; appara&icirc;t sur Feed, Gains, Micropr&ecirc;ts, Param&egrave;tres mais dispara&icirc;t sur Staking. La pr&eacute;sence inconsistante nuit &agrave; la preuve sociale.</p>
+      </div>
+
+      <div class="finding finding--p1">
+        <div class="finding__number">#7</div>
+        <span class="badge badge--p1">P1 Important</span>
+        <h4 class="finding__title">&Eacute;tat du wallet incoh&eacute;rent</h4>
+        <p class="finding__desc">Le Dashboard montre le wallet connect&eacute; (0x7a3F...8d0A) tandis que les autres pages montrent &laquo;&nbsp;Connect Wallet&nbsp;&raquo;. L'&eacute;tat n'est pas partag&eacute; entre les navigations.</p>
+      </div>
+
+    </div>
+
+    <!-- P2 Polish -->
+    <h3 style="font-family: var(--font-mono); margin-bottom: 24px;">
+      <span class="badge badge--p2">&#9888; P2 &mdash; Am&eacute;lioration</span>
+    </h3>
+    <div class="findings-grid fade-in">
+
+      <div class="finding finding--p2">
+        <div class="finding__number">#8</div>
+        <span class="badge badge--p2">P2 Am&eacute;lioration</span>
+        <h4 class="finding__title">Pas d'&eacute;tats Loading / Erreur / Vide</h4>
+        <p class="finding__desc">Aucun skeleton loader, aucun message d'erreur, aucune illustration d'&eacute;tat vide. Seule exception : &laquo;&nbsp;No Holdings Yet&nbsp;&raquo; sur le Launchpad.</p>
+      </div>
+
+      <div class="finding finding--p2">
+        <div class="finding__number">#9</div>
+        <span class="badge badge--p2">P2 Am&eacute;lioration</span>
+        <h4 class="finding__title">Cards de posts sans hi&eacute;rarchie visuelle</h4>
+        <p class="finding__desc">Pas de s&eacute;paration claire entre le contenu m&eacute;dia, le texte et les m&eacute;tadonn&eacute;es. Les infos utilisateur, timestamps et m&eacute;triques se confondent.</p>
+      </div>
+
+      <div class="finding finding--p2">
+        <div class="finding__number">#10</div>
+        <span class="badge badge--p2">P2 Am&eacute;lioration</span>
+        <h4 class="finding__title">Typographie monospace partout</h4>
+        <p class="finding__desc">Bien que coh&eacute;rent avec le th&egrave;me cyberpunk, l'utilisation exclusive de monospace r&eacute;duit la lisibilit&eacute; du contenu long et des commentaires.</p>
+      </div>
+
+      <div class="finding finding--p2">
+        <div class="finding__number">#11</div>
+        <span class="badge badge--p2">P2 Am&eacute;lioration</span>
+        <h4 class="finding__title">Accessibilit&eacute; absente</h4>
+        <p class="finding__desc">Pas d'indicateurs de focus visibles, pas de lien skip-nav, attributs ARIA minimaux, pas de support navigation clavier, pas de support reduced-motion.</p>
+      </div>
+
+      <div class="finding finding--p2">
+        <div class="finding__number">#12</div>
+        <span class="badge badge--p2">P2 Am&eacute;lioration</span>
+        <h4 class="finding__title">Fond Matrix g&ecirc;ne la lisibilit&eacute;</h4>
+        <p class="finding__desc">L'animation de pluie Matrix en arri&egrave;re-plan, bien que th&eacute;matique, r&eacute;duit le contraste et la lisibilit&eacute; sur les pages avec du contenu dense.</p>
+      </div>
+
+    </div>
+
+    <!-- Constats AR World Explorer (Mis &agrave; jour 2026-03-05) -->
+    <h3 style="font-family: var(--font-mono); margin: 48px 0 24px;">
+      <span style="color: var(--green);">// AR World Explorer</span> &mdash;
+      <span class="badge badge--p0">&#9888; P0 &times;2</span>
+      <span class="badge badge--p1">P1</span>
+      <span class="badge badge--p2">P2</span>
+    </h3>
+
+    <!-- Points positifs -->
+    <div class="card fade-in" style="border-color: var(--green); margin-bottom: 24px; padding: 20px 24px;">
+      <h4 style="font-family: var(--font-mono); color: var(--green); margin-bottom: 12px;">&#10004; Ce qui fonctionne bien</h4>
+      <ul style="list-style: none; line-height: 2; font-size: .9rem; color: var(--gray-light);">
+        <li>&#10148; Interface carte Leaflet propre avec tuiles CartoDB Dark Matter</li>
+        <li>&#10148; Design sombre coh&eacute;rent avec la plateforme principale</li>
+        <li>&#10148; Tol&eacute;rance &agrave; la d&eacute;rive GPS impl&eacute;ment&eacute;e</li>
+        <li>&#10148; Syst&egrave;me de tiers NFT en place (Bronze / Silver / Gold / Diamond)</li>
+        <li>&#10148; Restriction AR mobile uniquement (choix de design intentionnel)</li>
+        <li>&#10148; En-t&ecirc;tes de s&eacute;curit&eacute; correctement configur&eacute;s (CORS, protection XSS, cookies SameSite)</li>
+        <li>&#10148; <strong>Le claiming NFT en lui-m&ecirc;me fonctionne</strong> &mdash; le flux proximit&eacute; GPS + modale est op&eacute;rationnel</li>
+      </ul>
+    </div>
+
+    <div class="findings-grid fade-in" style="margin-bottom: 24px;">
+
+      <div class="finding finding--p0">
+        <div class="finding__number">#14</div>
+        <span class="badge badge--p0">P0 Critique</span>
+        <h4 class="finding__title">Les NFT claim&eacute;s restent affich&eacute;s comme disponibles</h4>
+        <p class="finding__desc">La carte affiche 21 732 points de drop NFT. <strong>Tous les marqueurs sont verts (disponibles)</strong> &mdash; aucun marqueur bleu (claim&eacute;) visible. L'API <code style="color: var(--green);">/api/get-nft-drops.php</code> retourne <code style="color: var(--red);">isClaimed: false</code> pour chaque drop. Le backend ne met jamais &agrave; jour le flag apr&egrave;s un claim r&eacute;ussi.</p>
+        <div class="finding__evidence">
+          <span class="comment">// Analyse API :</span><br>
+          &bull; <code style="color: var(--green);">/api/get-nft-drops.php</code> &rarr; <span class="value">21 732 drops retourn&eacute;s</span><br>
+          &bull; Chaque drop : <code style="color: var(--red);">isClaimed: false</code><br>
+          &bull; Code frontend correct : <code style="color: var(--gray-light);">fillColor: isClaimed ? '#00aaff' : '#00ff00'</code><br>
+          &bull; Cause racine : <span style="color: var(--red);">le backend ne met pas &agrave; jour le flag isClaimed au claim</span><br>
+          &bull; Correctif : mettre &agrave; jour <code>isClaimed = true</code> en BDD au claim, ET filtrer par wallet dans l'API
+        </div>
+      </div>
+
+      <div class="finding finding--p0">
+        <div class="finding__number">#14b</div>
+        <span class="badge badge--p0">P0 Critique</span>
+        <h4 class="finding__title">Connexion wallet &eacute;choue &mdash; NFT claim&eacute;s invisibles</h4>
+        <p class="finding__desc">Le bouton &laquo; My NFTs &raquo; affiche <span style="color: var(--red);">&laquo; Please install MetaMask &raquo;</span> au lieu d'ouvrir la connexion wallet. L'endpoint backend <code style="color: var(--green);">/api/get-user-nfts.php</code> retourne une erreur serveur, rendant impossible la consultation des NFT claim&eacute;s.</p>
+        <div class="finding__evidence">
+          <span class="comment">// Test API :</span><br>
+          &bull; <code style="color: var(--green);">/api/get-user-nfts.php</code> &rarr; <code style="color: var(--red);">{"success":false,"error":"Server error"}</code><br>
+          &bull; Cause racine : bug backend PHP (probablement requ&ecirc;te SQL d&eacute;faillante wallet &rarr; NFTs)<br>
+          &bull; Correctif : d&eacute;boguer l'endpoint PHP, corriger la requ&ecirc;te SQL d'association wallet &rarr; NFTs
+        </div>
+      </div>
+
+    </div>
+
+    <div class="findings-grid fade-in" style="margin-bottom: 24px;">
+
+      <div class="finding finding--p1">
+        <div class="finding__number">#15</div>
+        <span class="badge badge--p1">P1 Important</span>
+        <h4 class="finding__title">Solde $STATE non affich&eacute;</h4>
+        <p class="finding__desc">La page gameplay affiche &laquo; Install MetaMask &raquo; au lieu du solde de tokens $STATE. La fonction <code style="color: var(--green);">fetchSTATEBalance()</code> &eacute;choue silencieusement sans message de repli pour l'utilisateur.</p>
+        <div class="finding__evidence">
+          <span class="comment">// Comportement attendu :</span><br>
+          &bull; Si MetaMask install&eacute; &rarr; afficher le solde $STATE<br>
+          &bull; Si MetaMask non install&eacute; &rarr; <span style="color: var(--red);">affiche actuellement une erreur</span><br>
+          &bull; Correctif : afficher un message de repli &laquo; Connectez votre wallet pour voir le solde &raquo;
+        </div>
+      </div>
+
+      <div class="finding finding--p1">
+        <div class="finding__number">#16</div>
+        <span class="badge badge--p1">P1 Important</span>
+        <h4 class="finding__title">AR World sur un domaine s&eacute;par&eacute; &mdash; Aucune int&eacute;gration</h4>
+        <p class="finding__desc">L'AR World Explorer est h&eacute;berg&eacute; sur <code style="color: var(--green);">pblcnft-claim.onrender.com</code>, compl&egrave;tement d&eacute;connect&eacute; de la plateforme principale (<code style="color: var(--green);">nwo.capital</code>). Aucune authentification partag&eacute;e, aucune navigation commune, aucun &eacute;tat wallet partag&eacute;. Les utilisateurs doivent reconnecter MetaMask s&eacute;par&eacute;ment.</p>
+      </div>
+
+    </div>
+
+    <div class="findings-grid fade-in" style="margin-bottom: 24px;">
+
+      <div class="finding finding--p2">
+        <div class="finding__number">#17</div>
+        <span class="badge badge--p2">P2 Mineur</span>
+        <h4 class="finding__title">Champ de recherche sans attribut ID</h4>
+        <p class="finding__desc">Le champ de recherche sur la page gameplay n'a pas d'attribut <code style="color: var(--green);">id</code> ni <code style="color: var(--green);">name</code>, emp&ecirc;chant une gestion correcte du formulaire et l'&eacute;tiquetage pour l'accessibilit&eacute;.</p>
+      </div>
+
+    </div>
+
+    <!-- Tableau des r&eacute;sultats de tests API -->
+    <div class="card fade-in" style="margin-bottom: 48px; padding: 20px 24px;">
+      <h4 style="font-family: var(--font-mono); color: var(--green); margin-bottom: 16px;">// R&eacute;sultats des tests d'endpoints API</h4>
+      <table style="width: 100%; font-size: .85rem; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--gray-dark); text-align: left;">
+            <th style="padding: 8px 12px; color: var(--gray-light);">Endpoint</th>
+            <th style="padding: 8px 12px; color: var(--gray-light);">Statut</th>
+            <th style="padding: 8px 12px; color: var(--gray-light);">Probl&egrave;me</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--gray-dark);">
+            <td style="padding: 8px 12px; font-family: var(--font-mono); font-size: .8rem;">/api/get-nft-drops.php</td>
+            <td style="padding: 8px 12px;"><span style="color: var(--green);">OK</span> (21 732 drops)</td>
+            <td style="padding: 8px 12px; color: var(--orange);">isClaimed: false partout</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--gray-dark);">
+            <td style="padding: 8px 12px; font-family: var(--font-mono); font-size: .8rem;">/api/get-user-nfts.php</td>
+            <td style="padding: 8px 12px;"><span style="color: var(--red);">ERREUR</span></td>
+            <td style="padding: 8px 12px; color: var(--red);">{"success":false,"error":"Server error"}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--gray-dark);">
+            <td style="padding: 8px 12px; font-family: var(--font-mono); font-size: .8rem;">CartoDB tiles</td>
+            <td style="padding: 8px 12px;"><span style="color: var(--green);">OK</span></td>
+            <td style="padding: 8px 12px; color: var(--gray);">&mdash;</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 12px; font-family: var(--font-mono); font-size: .8rem;">Recherche Nominatim</td>
+            <td style="padding: 8px 12px;"><span style="color: var(--green);">OK</span></td>
+            <td style="padding: 8px 12px; color: var(--gray);">&mdash;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ========== COLOR PALETTE ========== -->
+<section id="palette">
+  <div class="container">
+    <div class="section-tag">// 04 &mdash; Identit&eacute; Visuelle</div>
+    <h2 class="section-title">Palette de Couleurs Extraite</h2>
+    <p class="section-desc">Ces couleurs doivent &ecirc;tre conserv&eacute;es. La refonte am&eacute;liorera la hi&eacute;rarchie, l'espacement et la typographie sans modifier les couleurs de marque.</p>
+
+    <div class="palette-grid fade-in">
+      <div class="color-swatch">
+        <div class="color-swatch__preview" style="background: #000000;"></div>
+        <div class="color-swatch__info">
+          <div class="color-swatch__name">Fond Principal</div>
+          <div class="color-swatch__hex">#000000 &mdash; Noir pur</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-swatch__preview" style="background: #111111;"></div>
+        <div class="color-swatch__info">
+          <div class="color-swatch__name">Fond des Cards</div>
+          <div class="color-swatch__hex">#111111 &mdash; Gris tr&egrave;s fonc&eacute;</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-swatch__preview" style="background: #1a1a1a;"></div>
+        <div class="color-swatch__info">
+          <div class="color-swatch__name">Cards Alt / Bordures</div>
+          <div class="color-swatch__hex">#1A1A1A &mdash; Charbon</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-swatch__preview" style="background: #00ff00; box-shadow: 0 0 30px rgba(0,255,0,.4);"></div>
+        <div class="color-swatch__info">
+          <div class="color-swatch__name">Accent &mdash; Vert Matrix</div>
+          <div class="color-swatch__hex">#00FF00 &mdash; La Signature</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-swatch__preview" style="background: #ffffff;"></div>
+        <div class="color-swatch__info">
+          <div class="color-swatch__name">Texte Principal</div>
+          <div class="color-swatch__hex">#FFFFFF &mdash; Blanc</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-swatch__preview" style="background: #888888;"></div>
+        <div class="color-swatch__info">
+          <div class="color-swatch__name">Texte Secondaire</div>
+          <div class="color-swatch__hex">#888888 &mdash; Gris moyen</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-swatch__preview" style="background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);"></div>
+        <div class="color-swatch__info">
+          <div class="color-swatch__name">D&eacute;grad&eacute; &mdash; Bleu Nuit</div>
+          <div class="color-swatch__hex">#1A1A2E &rarr; #0F3460</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-swatch__preview" style="background: linear-gradient(135deg, #2d1b4e, #1b4d2d, #4d1b1b);"></div>
+        <div class="color-swatch__info">
+          <div class="color-swatch__name">D&eacute;grad&eacute; &mdash; Accents Cards</div>
+          <div class="color-swatch__hex">#2D1B4E / #1B4D2D / #4D1B1B</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SCORES ========== -->
+<section id="scores">
+  <div class="container">
+    <div class="section-tag">// 05 &mdash; Analyse</div>
+    <h2 class="section-title">Divergence des Valeurs $STATE</h2>
+    <p class="section-desc">Le probl&egrave;me central de confiance : le m&ecirc;me compte affiche des soldes diff&eacute;rents selon la page.</p>
+
+    <div class="terminal fade-in">
+      <div class="terminal__bar">
+        <div class="terminal__dot terminal__dot--red"></div>
+        <div class="terminal__dot terminal__dot--yellow"></div>
+        <div class="terminal__dot terminal__dot--green"></div>
+        <span class="terminal__title">state_audit.log &mdash; Analyse de la divergence des soldes</span>
+      </div>
+      <div class="terminal__body">
+        <span class="comment">// ---- Source A : "Total gains WebApp" (engagement + jeu + tips + airdrops) ----</span><br>
+        <span class="comment">// Pages : Feed, Profil, Dashboard, Staking, Micropr&ecirc;ts, Param&egrave;tres, Jeu</span><br>
+        $ solde_a = <span class="value">409,707,719,481 $STATE</span><br><br>
+
+        <span class="comment">// ---- Source B : "Gains engagement uniquement" (sans jeu, sans airdrops) ----</span><br>
+        <span class="comment">// Pages : Gains, Launchpad</span><br>
+        $ solde_b = <span class="error">190,816,106,996 $STATE</span><br><br>
+
+        <span class="comment">// ---- Source C : Solde wallet on-chain (donn&eacute;es blockchain r&eacute;elles) ----</span><br>
+        <span class="comment">// Pages : Exchange</span><br>
+        $ solde_c = <span class="warn">875,183,153,310.64 STATE</span><br><br>
+
+        <span class="comment">// ---- V&eacute;rification ----</span><br>
+        $ delta_ab = solde_a - solde_b<br>
+        $ delta_ab = <span class="warn">218,891,612,485</span> <span class="comment">// &asymp; correspond &agrave; "Jeu: 402B + Airdrops: -218B"</span><br><br>
+
+        <span class="comment">// ---- Cause racine ----</span><br>
+        <span class="error">DIAGNOSTIC : Chaque page interroge des colonnes/calculs diff&eacute;rents.</span><br>
+        <span class="error">SOLUTION : Un endpoint API unique comme source de v&eacute;rit&eacute;.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== RECOMMENDATION ========== -->
+<section id="recommendation">
+  <div class="container">
+    <div class="section-tag">// 06 &mdash; Recommandation</div>
+    <h2 class="section-title">Recommandation Framework</h2>
+    <p class="section-desc">Bas&eacute; sur les constats de l'audit, voici notre recommandation d'architecture pour la refonte.</p>
+
+    <div class="findings-grid fade-in">
+      <div class="card" style="border-color: var(--green);">
+        <h3 style="font-family: var(--font-mono); color: var(--green); margin-bottom: 16px;">&#10004; Recommand&eacute; : React + Vite</h3>
+        <ul style="list-style: none; line-height: 2.2; font-size: .9rem; color: var(--gray-light);">
+          <li>&#10148; R&eacute;sout l'incoh&eacute;rence d'&eacute;tat inter-pages via un store global</li>
+          <li>&#10148; La r&eacute;utilisabilit&eacute; des composants &eacute;limine la fragmentation</li>
+          <li>&#10148; Navigation SPA native, sans rechargements complets</li>
+          <li>&#10148; &Eacute;tat wallet (Web3) g&eacute;r&eacute; centralement via context</li>
+          <li>&#10148; Meilleure exp&eacute;rience d&eacute;veloppeur pour 17+ pages</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-family: var(--font-mono); color: var(--white); margin-bottom: 16px;">Actuel : HTML/PHP Vanilla</h3>
+        <ul style="list-style: none; line-height: 2.2; font-size: .9rem; color: var(--gray-light);">
+          <li>&#10006; Chaque page est un fichier .php ind&eacute;pendant</li>
+          <li>&#10006; Aucun &eacute;tat partag&eacute; entre les pages</li>
+          <li>&#10006; Code de layout dupliqu&eacute; et divergent</li>
+          <li>&#10006; Connexion wallet Web3 perdue &agrave; la navigation</li>
+          <li>&#10006; Aucun syst&egrave;me de composants = UI incoh&eacute;rente</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- AR World Explorer — Correctifs prioritaires -->
+    <div class="card fade-in" style="border-color: var(--orange); margin-top: 32px; padding: 20px 24px;">
+      <h3 style="font-family: var(--font-mono); color: var(--orange); margin-bottom: 16px;">&#9888; AR World Explorer &mdash; Correctifs Backend Prioritaires</h3>
+      <ul style="list-style: none; line-height: 2.2; font-size: .9rem; color: var(--gray-light);">
+        <li><span style="color: var(--red);">&#10148; P0 :</span> Corriger l'endpoint <code style="color: var(--green);">/api/get-user-nfts.php</code> (retourne actuellement une erreur serveur)</li>
+        <li><span style="color: var(--red);">&#10148; P0 :</span> Mettre &agrave; jour le flag <code style="color: var(--green);">isClaimed</code> dans l'API <code style="color: var(--green);">get-nft-drops</code> apr&egrave;s les claims r&eacute;ussis</li>
+        <li><span style="color: var(--orange);">&#10148; P1 :</span> Afficher un message de repli pour le solde $STATE quand MetaMask n'est pas disponible</li>
+        <li><span style="color: var(--yellow);">&#10148; P2 :</span> Ajouter un attribut <code style="color: var(--green);">id</code> au champ de recherche de la page gameplay</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__logo">&lt;Publicae./&gt;</div>
+    <p>Rapport d'Audit UI/UX &middot; Mars 2026 &middot; Version 1.1</p>
+    <p style="margin-top: 8px;"><a href="audit-en.html" style="color: var(--green); text-decoration: none;">Read in English &rarr;</a></p>
+  </div>
+</footer>
+
+<!-- ========== SCRIPTS ========== -->
+<script>
+  // Matrix Rain
+  const canvas = document.getElementById('matrix-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$STATE<>/{}[]();:';
+  const fontSize = 14;
+  const columns = Math.floor(canvas.width / fontSize);
+  const drops = Array(columns).fill(1);
+
+  function drawMatrix() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff00';
+    ctx.font = fontSize + 'px monospace';
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+
+  setInterval(drawMatrix, 50);
+
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+
+  // Sticky Nav
+  const nav = document.getElementById('nav');
+  const heroHeight = document.querySelector('.hero').offsetHeight;
+
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('visible', window.scrollY > heroHeight - 100);
+  });
+
+  // Scroll Fade-In
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

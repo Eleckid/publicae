@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — Publicae</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-bg: #000000;
+      --color-card: #111111;
+      --color-card-alt: #1a1a1a;
+      --color-border: #222222;
+      --color-accent: #00ff00;
+      --color-white: #ffffff;
+      --color-gray: #888888;
+      --color-gray-light: #cccccc;
+      --color-gray-dark: #444444;
+      --color-error: #ff4444;
+      --color-warning: #ff8800;
+      --color-info: #4d96ff;
+      --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+  </style>
+  <link rel="stylesheet" href="assets/css/global.css" />
+</head>
+<body class="bg-bg text-white font-sans min-h-screen">
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-accent focus:text-bg focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold">Skip to content</a>
+  <div id="sidebar-root"></div>
+  <div id="topbar-root"></div>
+
+  <main id="main-content" class="lg:ml-60 pt-14 min-h-screen">
+    <div class="max-w-2xl mx-auto px-4 py-6">
+
+      <!-- Notifications -->
+      <section class="mb-8">
+        <h2 class="font-mono text-sm text-gray uppercase tracking-wider mb-4">Notifications</h2>
+        <div id="settings-notifications" class="bg-card border border-border rounded-xl divide-y divide-border">
+          <!-- Injecte par settings.js -->
+        </div>
+      </section>
+
+      <!-- Privacy -->
+      <section class="mb-8">
+        <h2 class="font-mono text-sm text-gray uppercase tracking-wider mb-4">Privacy</h2>
+        <div id="settings-privacy" class="bg-card border border-border rounded-xl divide-y divide-border">
+          <!-- Injecte par settings.js -->
+        </div>
+      </section>
+
+      <!-- Wallet -->
+      <section class="mb-8">
+        <h2 class="font-mono text-sm text-gray uppercase tracking-wider mb-4">Wallet</h2>
+        <div id="settings-wallet" class="bg-card border border-border rounded-xl p-5">
+          <!-- Injecte par settings.js -->
+        </div>
+      </section>
+
+      <!-- Danger zone -->
+      <section>
+        <h2 class="font-mono text-sm text-error uppercase tracking-wider mb-4">Danger Zone</h2>
+        <div class="bg-card border border-error/20 rounded-xl p-5">
+          <p class="text-sm text-gray mb-4">These actions are irreversible. Please proceed with caution.</p>
+          <div class="flex flex-wrap gap-3">
+            <button id="btn-export-data" class="text-sm text-white bg-card-alt px-4 py-2 rounded-lg hover:bg-gray-dark transition-colors">Export My Data</button>
+            <button id="btn-delete-account" class="text-sm text-error border border-error/30 px-4 py-2 rounded-lg hover:bg-error/10 transition-colors">Delete Account</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="toast-root" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2" aria-live="polite"></div>
+  <div id="modal-root" class="hidden"></div>
+
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/mock-api.js"></script>
+  <script src="assets/js/components.js"></script>
+  <script src="assets/js/router.js"></script>
+  <script src="assets/js/settings.js"></script>
+</body>
+</html>

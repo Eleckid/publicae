@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <!-- Boite vide stylisee -->
+  <rect x="50" y="40" width="100" height="80" rx="8" stroke="#333333" stroke-width="2" fill="none"/>
+  <line x1="50" y1="60" x2="150" y2="60" stroke="#333333" stroke-width="2"/>
+  <circle cx="100" cy="90" r="15" stroke="#333333" stroke-width="2" fill="none"/>
+  <line x1="93" y1="83" x2="107" y2="97" stroke="#333333" stroke-width="2"/>
+  <line x1="107" y1="83" x2="93" y2="97" stroke="#333333" stroke-width="2"/>
+  <!-- Particules decoratives -->
+  <circle cx="40" cy="50" r="2" fill="#00ff00" opacity="0.3"/>
+  <circle cx="160" cy="70" r="2" fill="#00ff00" opacity="0.3"/>
+  <circle cx="80" cy="30" r="1.5" fill="#00ff00" opacity="0.2"/>
+  <circle cx="130" cy="130" r="1.5" fill="#00ff00" opacity="0.2"/>
+</svg>
